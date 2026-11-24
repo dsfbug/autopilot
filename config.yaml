@@ -18,9 +18,9 @@ settings:
   compilation_min_score: 45  # balances quality vs. having enough clips for a full compilation
 
 autopilot:
-  daily_count: 7
+  daily_count: 9
   min_score: 65
-  game: ""
+  game: "Grand Theft Auto VI"
   scope: configured
   pre_llm_screen: true
   fallback_to_gamewide: false
@@ -105,7 +105,7 @@ channels:
     token_file: ".clipper_token.json"
     default_privacy: unlisted  # SAFE DEFAULT
     schedule:
-      shorts_per_day: 7
+      shorts_per_day: 9
       release_times: ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"]
   # Add more channels as needed:
   # my_tiktok:
@@ -116,3 +116,14 @@ channels:
   #   schedule:
   #     shorts_per_day: 3
   #     release_times: ["08:00", "13:00", "19:00"]
+
+# Pre-publish checks run by `python -m clipper.gates`. All values are settings.
+publish_gates:
+  enforce: true  # fail closed: uploads to YouTube are blocked unless checks and content review pass
+  width: 1080
+  height: 1920
+  min_seconds: 5
+  max_seconds: 28.9  # keeps the displayed length under 30s; raise toward 60 if you want longer Shorts
+  video_codec: h264
+  audio_codec: aac
+  required_meta: [title, description, source_url, creator, anchor_note]
