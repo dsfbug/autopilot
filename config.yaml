@@ -28,8 +28,8 @@ autopilot:
   shorts_layout: fill
   period: 24h
   channel: default
-  auto_upload: true
-  privacy: public
+  auto_upload: false  # SAFE DEFAULT: review clips before anything uploads
+  privacy: unlisted  # SAFE DEFAULT: no accidental public posts
   prefer_calibrated_streamers: true
   require_calibrated_streamers: true
   allow_uncalibrated_fallback: true
@@ -53,7 +53,7 @@ upload:
 
     #shorts #{game_tag} #{streamer_tag} #clips #twitch #gaming
   default_privacy: unlisted
-  max_uploads_per_day: 50
+  max_uploads_per_day: 9  # daily cap guardrail
 
   global_tags:
     - gaming
@@ -66,7 +66,7 @@ upload:
   extract_thumbnail: true
 
 subtitles:
-  whisper_model: large-v3
+  whisper_model: small  # CPU-friendly; large-v3 needs a strong GPU
   font_size: 52
   outline_width: 5
   words_per_phrase: 3
@@ -103,7 +103,7 @@ channels:
     name: "Main Channel"
     platform: youtube
     token_file: ".clipper_token.json"
-    default_privacy: public
+    default_privacy: unlisted  # SAFE DEFAULT
     schedule:
       shorts_per_day: 7
       release_times: ["08:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"]
