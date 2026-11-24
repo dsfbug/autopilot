@@ -27,6 +27,7 @@ GAME_TAG_EXPANSIONS = {
     "Just Chatting": ["just chatting", "irl", "react"],
     "Fortnite": ["fortnite", "fortnite clips", "fortnite highlights", "battle royale", "fortnite wins"],
     "GTA V": ["gta", "gta 5", "gta rp", "grand theft auto", "gta clips"],
+    "GTA VI": ["gta 6", "gta vi", "gta6", "gta 6 clips", "gta 6 gameplay", "gta 6 highlights", "grand theft auto 6", "gta 6 moments"],
     "Minecraft": ["minecraft", "mc", "minecraft clips", "minecraft highlights"],
     "Overwatch 2": ["overwatch", "overwatch 2", "ow2", "ow2 clips", "overwatch highlights"],
     "Call of Duty": ["cod", "call of duty", "warzone", "cod clips", "warzone clips"],
