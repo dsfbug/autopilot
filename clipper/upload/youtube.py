@@ -3,6 +3,7 @@
 import html
 import json
 import logging
+import os
 import re
 import socket
 import subprocess
@@ -394,6 +395,14 @@ def _upload_captions(service, video_id: str, video_path: str, verbose: bool = Fa
     if caption_path is None:
         return
 
+    if os.environ.get("CLIPPER_YT_REFRESH_TOKEN_FILE"):
+        # Upload-only credentials (youtube.upload scope) cannot call captions.insert.
+        console.print(
+            "  [yellow]Captions NOT uploaded: upload-only credentials lack the scope "
+            "captions.insert needs (youtube.force-ssl). Video upload is unaffected.[/yellow]"
+        )
+        return
+
     try:
         service.captions().insert(
             part="snippet",
@@ -403,8 +412,7 @@ def _upload_captions(service, video_id: str, video_path: str, verbose: bool = Fa
         if verbose:
             console.print(f"  [green]Captions uploaded:[/green] {caption_path.name}")
     except Exception as e:
-        if verbose:
-            console.print(f"  [yellow]Caption upload failed: {e}[/yellow]")
+        console.print(f"  [yellow]Caption upload failed: {e}[/yellow]")
 
 
 def update_video_metadata(
@@ -644,8 +652,13 @@ def upload_clip(clip, config, privacy="unlisted", verbose=False, channel=None, p
                     ).execute()
                     console.print("  [green]Custom thumbnail set[/green]")
                 except Exception as e:
-                    # Custom thumbnails require verified account
-                    console.print(f"  [yellow]Thumbnail upload failed (may need verified account): {e}[/yellow]")
+                    # Cause not determined: youtube.upload scope is documented as sufficient for
+                    # thumbnails.set, so a 403 here is more likely channel eligibility
+                    # (custom thumbnails need a verified channel). Not confirmed.
+                    console.print(
+                        f"  [yellow]Custom thumbnail NOT set (cause unresolved; possibly channel "
+                        f"not eligible for custom thumbnails). Video upload is unaffected: {e}[/yellow]"
+                    )
 
         return video_id
 
