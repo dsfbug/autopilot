@@ -149,3 +149,17 @@ If you only need uploads, you can skip the broad-scope consent. Authorize once w
     export CLIPPER_YT_REFRESH_TOKEN_FILE=/path/refresh_token
 
 The uploader then mints an access token in memory and never writes `.clipper_token.json`. This mode cannot read the channel, change an existing video or fetch analytics. Keep `privacy: unlisted` until you have reviewed a clip.
+
+### Publish gates (fail closed)
+
+Every YouTube upload goes through `clipper/upload/dispatcher.py`, which now calls `clipper.gates.gate_failures_for_upload` first. If anything is missing or fails, the upload is skipped and `_upload_error_reason` is set to `publish_gate_failed` with the reasons.
+
+File checks (settings under `publish_gates` in `config.yaml`): resolution, codecs, duration range, required metadata (title, creator, source link, anchor note).
+
+Content review is separate and explicit. A clip must carry:
+
+    "content_review": {"approved": true, "evidence_url": "<page showing the scene is from the game>", "reviewer": "<who checked the frames>"}
+
+A note is not evidence. A person (or an agent that opened the page and looked at real frames) sets this; nothing sets it automatically. Set `publish_gates.enforce: false` only if you want to turn the checks off.
+
+Run the tests (no upload happens, the uploader is stubbed): `python tests/test_gates_dispatch.py <good_final.mp4> <bad_final.mp4>`. File names must contain `_final` or the pipeline reformats them first.
