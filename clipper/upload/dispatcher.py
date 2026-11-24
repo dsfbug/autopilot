@@ -87,8 +87,19 @@ def _ensure_formatted(clip: dict, config: dict) -> dict:
 
 def upload_clip(clip, config, privacy="unlisted", verbose=False, channel=None, publish_at=None) -> str | None:
     """Upload a clip via the platform module for the given channel."""
-    clip = _ensure_formatted(clip, config)
     platform = get_channel_platform(channel, config)
+    if platform == "youtube":
+        from clipper.gates import gate_failures_for_upload
+        clip = _ensure_formatted(clip, config)
+        reasons = gate_failures_for_upload(clip, config)
+        if reasons:
+            msg = "; ".join(reasons)
+            logger.error("Upload blocked by publish gates for %s: %s", clip.get("id", "?"), msg)
+            clip["_upload_error_reason"] = "publish_gate_failed"
+            clip["_upload_error_message"] = msg
+            return None
+    else:
+        clip = _ensure_formatted(clip, config)
     mod = _get_module(platform)
     fn = mod.upload_clip
     import inspect
