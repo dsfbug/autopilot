@@ -95,6 +95,42 @@ Runs via launchd cron on macOS. The web dashboard is for reviewing clips and mon
 
 ## Setup
 
+## Plug-and-play setup (single YouTube channel)
+
+Tested path for running this yourself at zero cost on one channel:
+
+1. **Google account**: the account that owns the YouTube channel must have
+   2-Step Verification turned on - Google Cloud blocks console access without it
+   (enforced since May 2026). Turn it on at myaccount.google.com/security.
+2. **Google Cloud project**: in console.cloud.google.com (signed in as the
+   channel account), create a project, then enable **YouTube Data API v3**
+   (APIs & Services > Library).
+3. **OAuth consent screen**: APIs & Services > OAuth consent screen. If the
+   console offers an **Audience: Personal** mode, pick it - it needs no
+   verification, shows no unverified-app warning, and its tokens do not expire
+   after 7 days. Otherwise choose External; in **Testing** status add the
+   channel account as a test user and re-run `python -m clipper auth` weekly
+   (testing-mode refresh tokens expire in 7 days), or publish the app to
+   production status to avoid that.
+4. **OAuth client**: APIs & Services > Credentials > Create Credentials >
+   OAuth client ID > application type **Desktop app**. Download the JSON and
+   save it as `client_secrets.json` in the project root.
+5. **Authenticate**: `python -m clipper auth` opens a browser on the machine.
+   On a headless server, use `python scripts/auth_headless.py` instead and
+   paste the final redirect URL back.
+6. **Uploads default to unlisted** (see `config.yaml`: `auto_upload: false`,
+   `privacy: unlisted`, `default_privacy: unlisted`). Review clips in the
+   Studio queue, and flip privacy only when you actually want public posts.
+   Uploads from unverified API projects are no longer locked private per
+   YouTube's November 2026 API revision-history change, but verify with one
+   unlisted test upload before relying on any scheduled public posting.
+7. **Free quota**: the default API quota allows ~100 uploads/day - plenty for
+   a daily Shorts batch. Whisper runs locally (CPU-friendly `small` model is
+   the default here). Gemini screening is optional; without a key it falls
+   back to a local Ollama model if installed, or can be disabled
+   (`pre_llm_screen: false`).
+
+
 ```bash
 pip install -r requirements.txt
 cp .env.example .env            # Twitch, Meta, TikTok, Gemini API keys
