@@ -139,3 +139,13 @@ python -m clipper serve          # API + web UI → localhost:8420
 ```
 
 All behavior is driven by `config.yaml` — streamer lists, scoring thresholds, daily caps, posting schedules, layout preferences. No secrets in config; credentials live in `.env` and OAuth token files.
+
+### Upload-only mode (no token file)
+
+If you only need uploads, you can skip the broad-scope consent. Authorize once with the `youtube.upload` scope, then point the uploader at three files that each hold one value:
+
+    export CLIPPER_YT_CLIENT_ID_FILE=/path/client_id
+    export CLIPPER_YT_CLIENT_SECRET_FILE=/path/client_secret
+    export CLIPPER_YT_REFRESH_TOKEN_FILE=/path/refresh_token
+
+The uploader then mints an access token in memory and never writes `.clipper_token.json`. This mode cannot read the channel, change an existing video or fetch analytics. Keep `privacy: unlisted` until you have reviewed a clip.
