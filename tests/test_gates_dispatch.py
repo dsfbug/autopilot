@@ -7,11 +7,23 @@ from unittest import mock
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import json as _j, os as _o, tempfile as _t, time as _tm  # dedup has its own tests; give these gate tests a fresh empty index
+_ip = Path(_t.mkdtemp()) / "idx.json"; _ip.write_text(_j.dumps({"generated_at_epoch": _tm.time(), "entries": {}})); _o.environ["CLIPPER_DEDUP_INDEX"] = str(_ip)
 from clipper.upload import dispatcher  # noqa: E402
 
 CFG = yaml.safe_load(Path(__file__).resolve().parent.parent.joinpath("config.yaml").read_text())
-CLIP_FILE = sys.argv[1] if len(sys.argv) > 1 else "/downloads/gta6-d6-02-tminnzy-jason-1080x1920.mp4"
-BAD_FILE = sys.argv[2] if len(sys.argv) > 2 else "/downloads/gta6-evidence-youtube-route-MajesticDrama-bugs-720p60.mp4"
+import subprocess as _sp
+_FX = Path(_t.mkdtemp())
+
+def _mk(name, size, secs):
+    f = _FX / name
+    _sp.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-f", "lavfi", "-i", "testsrc=size=%s:rate=30:duration=%s" % (size, secs),
+             "-f", "lavfi", "-i", "sine=frequency=440:duration=%s" % secs, "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(f)], check=True)
+    return str(f)
+
+# Self-contained temporary fixtures (generated, not dependent on /downloads); optional CLI paths still override.
+CLIP_FILE = sys.argv[1] if len(sys.argv) > 1 else _mk("good_final.mp4", "1080x1920", 20)
+BAD_FILE = sys.argv[2] if len(sys.argv) > 2 else _mk("bad_final.mp4", "640x360", 40)
 
 GOOD = {
     "id": "t1", "processed_path": CLIP_FILE + "", "title": "Tminnzy pressed the wrong button 💀",
