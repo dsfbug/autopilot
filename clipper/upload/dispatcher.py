@@ -90,8 +90,9 @@ def upload_clip(clip, config, privacy="unlisted", verbose=False, channel=None, p
     platform = get_channel_platform(channel, config)
     if platform == "youtube":
         from clipper.gates import gate_failures_for_upload
+        from clipper.dedup import dedup_failures
         clip = _ensure_formatted(clip, config)
-        reasons = gate_failures_for_upload(clip, config)
+        reasons = dedup_failures(clip) + gate_failures_for_upload(clip, config)
         if reasons:
             msg = "; ".join(reasons)
             logger.error("Upload blocked by publish gates for %s: %s", clip.get("id", "?"), msg)
